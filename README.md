@@ -73,10 +73,17 @@ exp_root_dir=/path/to
 # python launch.py --config configs/fourdfy_stage_3.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
 ```
 
-## Tips
-- **Memory Usage**. Depending on the text prompt, stage 3 might not fit on a 40/48 GB GPU. An easy way to reduce memory usage is to reduce the number of ray samples with system.renderer.num_samples_per_ray=256 or system.renderer.num_samples_per_ray=128. Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80. Furthermore, by setting data.single_view.num_frames=8, the number of frames can be reduced.
-- **More motion**. To increase the motion, the learning rate for the video model can be increased to system.loss.lambda_sds_video=0.3 or system.loss.lambda_sds_video=0.5.
+## Memory Usage
+Depending on the text prompt, stage 3 might not fit on a 40/48 GB GPU, we trained our final models with an 80 GB GPU.
+There are ways to reduce memory usage to fit on smaller GPUs:
+- VSD guidance can be disabled and multi-view guidance increased accordingly to compensate by setting data.single_view.prob_single_view_video=1.0 and data.prob_multi_view=0.75
+- Reducing the number of ray samples with system.renderer.num_samples_per_ray=256 or system.renderer.num_samples_per_ray=128
+- Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80
+- Furthermore, by setting data.single_view.num_frames=8, the number of frames can be reduced
+- Reducing the hash grid capacity in system.geometry.pos_encoding_config, e.g., system.geometry.pos_encoding_config.n_levels=8. For this, retraining of the first two stages is required though.
 
+## More tips
+- **More motion**. To increase the motion, the learning rate for the video model can be increased to system.loss.lambda_sds_video=0.3 or system.loss.lambda_sds_video=0.5.
 
 ## Credits
 
