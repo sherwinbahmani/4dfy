@@ -78,7 +78,9 @@ Depending on the text prompt, stage 3 might not fit on a 40/48 GB GPU, we traine
 There are ways to reduce memory usage to fit on smaller GPUs:
 - VSD guidance can be disabled and multi-view guidance increased accordingly to compensate by setting data.single_view.prob_single_view_video=1.0 and data.prob_multi_view=0.75
 - Reducing the number of ray samples with system.renderer.num_samples_per_ray=256 or system.renderer.num_samples_per_ray=128
-- Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80
+- Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80 (or even data.single_view.width_vid=72 and data.single_view.height_vid=40)
+- Mixed precision: trainer.precision=16-mixed
+- Memory efficient attention: Set system.guidance_video.enable_memory_efficient_attention=true
 - Furthermore, by setting data.single_view.num_frames=8, the number of frames can be reduced
 - Reducing the hash grid capacity in system.geometry.pos_encoding_config, e.g., system.geometry.pos_encoding_config.n_levels=8. For this, retraining of the first two stages is required though.
 
