@@ -1,6 +1,6 @@
 # 4D-fy - threestudio
 
-| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://sherwinbahmani.github.io/4dfy/paper.pdf) |
+| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://sherwinbahmani.github.io/4dfy/paper.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study)|
 
 - **This code is forked from [threestudio](https://github.com/threestudio-project/threestudio).**
 
@@ -9,8 +9,6 @@
 ### Install threestudio
 
 **This part is the same as original threestudio. Skip it if you already have installed the environment.**
-
-See [installation.md](docs/installation.md) for additional information, including installation via Docker.
 
 - You must have an NVIDIA graphics card with at least 40GB VRAM and have [CUDA](https://developer.nvidia.com/cuda-downloads) installed.
 - Install `Python >= 3.8`.
@@ -61,6 +59,7 @@ Our model is trained in 3 stages and there are three different config files for 
 ```sh
 seed=0
 gpu=0
+exp_root_dir=/path/to
 
 # Stage 1
 # python launch.py --config configs/fourdfy_stage_1.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard"

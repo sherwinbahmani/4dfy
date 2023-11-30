@@ -1,5 +1,6 @@
 seed=0
 gpu=0
+exp_root_dir=/path/to
 
 # Stage 1
 # python launch.py --config configs/fourdfy_stage_1.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard"
