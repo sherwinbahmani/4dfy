@@ -1,6 +1,6 @@
 # 4D-fy - threestudio
 
-| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://sherwinbahmani.github.io/4dfy/paper.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study)|
+| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://sherwinbahmani.github.io/4dfy/paper.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study) |
 
 - **This code is forked from [threestudio](https://github.com/threestudio-project/threestudio).**
 
@@ -74,7 +74,7 @@ exp_root_dir=/path/to
 ```
 
 ## Tips
-- **Memory Usage**. Depending on the text prompt, stage 3 might not fit on a 40/48 GB GPU. An easy way to reduce memory usage is to reduce the number of ray samples with system.renderer.num_samples_per_ray=256 or system.renderer.num_samples_per_ray=128. Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80.
+- **Memory Usage**. Depending on the text prompt, stage 3 might not fit on a 40/48 GB GPU. An easy way to reduce memory usage is to reduce the number of ray samples with system.renderer.num_samples_per_ray=256 or system.renderer.num_samples_per_ray=128. Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80. Furthermore, by setting data.single_view.num_frames=8, the number of frames can be reduced.
 - **More motion**. To increase the motion, the learning rate for the video model can be increased to system.loss.lambda_sds_video=0.3 or system.loss.lambda_sds_video=0.5.
 
 
