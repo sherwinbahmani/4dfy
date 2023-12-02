@@ -1,6 +1,6 @@
 # 4D-fy - threestudio
 
-| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://sherwinbahmani.github.io/4dfy/paper.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study) |
+| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://arxiv.org/pdf/2311.17984.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study) |
 
 - **This code is forked from [threestudio](https://github.com/threestudio-project/threestudio).**
 
