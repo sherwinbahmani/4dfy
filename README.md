@@ -1,3 +1,7 @@
+**UPDATE**:
+- Our code has been integrated into threestudio as an extension: [threestudio extension](https://github.com/DSaurus/threestudio-4dfy)
+- This code includes config files to train models with **24 GB** GPUs.
+
 # 4D-fy - threestudio
 
 | [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://arxiv.org/pdf/2311.17984.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study) |
