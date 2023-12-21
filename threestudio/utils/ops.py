@@ -416,3 +416,11 @@ class ShapeLoss(nn.Module):
             nerf_occ, indicator, weight=weight
         )  # order is important for CE loss + second argument may not be optimized
         return loss
+
+def validate_empty_rays(ray_indices, t_start, t_end):
+    if ray_indices.nelement() == 0:
+        threestudio.warn("Empty rays_indices!")
+        ray_indices = torch.LongTensor([0]).to(ray_indices)
+        t_start = torch.Tensor([0]).to(ray_indices)
+        t_end = torch.Tensor([0]).to(ray_indices)
+    return ray_indices, t_start, t_end

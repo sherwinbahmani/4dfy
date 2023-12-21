@@ -1,10 +1,6 @@
-**UPDATE**:
-- Our code has been integrated into threestudio as an extension: [threestudio extension](https://github.com/DSaurus/threestudio-4dfy)
-- This code includes config files to train models with **24 GB** GPUs.
-
 # 4D-fy - threestudio
 
-| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://arxiv.org/pdf/2311.17984.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study) |
+| [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://arxiv.org/pdf/2311.17984.pdf) | [User Study Template](https://github.com/victor-rong/video-generation-study) | [threestudio extension](https://github.com/DSaurus/threestudio-4dfy)
 
 - **This code is forked from [threestudio](https://github.com/threestudio-project/threestudio).**
 
@@ -14,7 +10,7 @@
 
 **This part is the same as original threestudio. Skip it if you already have installed the environment.**
 
-- You must have an NVIDIA graphics card with at least 40GB VRAM and have [CUDA](https://developer.nvidia.com/cuda-downloads) installed.
+- You must have an NVIDIA graphics card with at least 24 GB VRAM and have [CUDA](https://developer.nvidia.com/cuda-downloads) installed.
 - Install `Python >= 3.8`.
 - (Optional, Recommended) Create a virtual environment:
 
@@ -65,6 +61,8 @@ seed=0
 gpu=0
 exp_root_dir=/path/to
 
+# Original configs used in paper with 80 GB GPU memory
+
 # Stage 1
 # python launch.py --config configs/fourdfy_stage_1.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard"
 
@@ -75,13 +73,26 @@ exp_root_dir=/path/to
 # Stage 3
 # ckpt=/path/to/fourdfy_stage_2/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
 # python launch.py --config configs/fourdfy_stage_3.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
+
+# Low memory configs for 24-48 GB GPU memory
+
+# Stage 1
+# python launch.py --config configs/fourdfy_stage_1_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard"
+
+# Stage 2
+# ckpt=/path/to/fourdfy_stage_1_low_vram/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_2_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
+
+# Stage 3
+# ckpt=/path/to/fourdfy_stage_2_low_vram/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
 ```
 
 ## Memory Usage
-Depending on the text prompt, stage 3 might not fit on a 40/48 GB GPU, we trained our final models with an 80 GB GPU.
+Depending on the text prompt, stage 3 might not fit on a 24-48 GB GPU, we trained our final models with an 80 GB GPU.
 There are ways to reduce memory usage to fit on smaller GPUs:
-- VSD guidance can be disabled and multi-view guidance increased accordingly to compensate by setting data.single_view.prob_single_view_video=1.0 and data.prob_multi_view=0.75
-- Reducing the number of ray samples with system.renderer.num_samples_per_ray=256 or system.renderer.num_samples_per_ray=128
+- Use the _low_vram config files instead of the original ones
+- If it still does not fit your GPU memory, you can reduce system.renderer.base_renderer.train_max_nums
 - Another way is to reduce the rendering resolution for the video model with data.single_view.width_vid=144 and data.single_view.height_vid=80 (or even data.single_view.width_vid=72 and data.single_view.height_vid=40)
 - Mixed precision: trainer.precision=16-mixed
 - Memory efficient attention: Set system.guidance_video.enable_memory_efficient_attention=true
@@ -100,10 +111,10 @@ This code is built on the [threestudio-project](https://github.com/threestudio-p
 If you find 4D-fy helpful, please consider citing:
 
 ```
-@article{bah20234dfy,
-  author = {Bahmani, Sherwin and Skorokhodov, Ivan and Rong, Victor and Wetzstein, Gordon and Guibas, Leonidas and Wonka, Peter and Tulyakov, Sergey and Park, Jeong Joon and Tagliasacchi, Andrea and Lindell, David B.},
-  title = {4D-fy: Text-to-4D Generation Using Hybrid Score Distillation Sampling},
-  journal = {arXiv},
-  year = {2023},
+@article{bahmani20234d,
+  title={4D-fy: Text-to-4D Generation Using Hybrid Score Distillation Sampling},
+  author={Bahmani, Sherwin and Skorokhodov, Ivan and Rong, Victor and Wetzstein, Gordon and Guibas, Leonidas and Wonka, Peter and Tulyakov, Sergey and Park, Jeong Joon and Tagliasacchi, Andrea and Lindell, David B.},
+  journal={arXiv preprint arXiv:2311.17984},
+  year={2023}
 }
 ```

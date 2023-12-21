@@ -19,6 +19,7 @@ class Fourdfy(BaseLift3DSystem):
         prob_multi_view: Optional[float] = None
         prob_single_view_video: Optional[float] = None
         eval_depth_range_perc: Tuple[float, float] = (10, 99) # Adjust manually based on object, near far depth bounds percentage in (0, 100)
+        freeze_static_modules: Optional[bool] = False
 
     cfg: Config
 
@@ -100,6 +101,9 @@ class Fourdfy(BaseLift3DSystem):
 
     def on_fit_start(self) -> None:
         super().on_fit_start()
+        if self.cfg.freeze_static_modules:
+            for p in self.parameters():
+                p.requires_grad = False
 
     def training_step(self, batch, batch_idx):
         is_video = batch["is_video"]
@@ -123,7 +127,10 @@ class Fourdfy(BaseLift3DSystem):
             num_static_frames = 1 # Use a single random time for static guidance
             batch["frame_times"] = batch["frame_times"][torch.randperm(batch["frame_times"].shape[0])][:num_static_frames]
             self.geometry_encoding.is_video = False
-            self.geometry_encoding.set_temp_param_grad(False)
+            if self.cfg.freeze_static_modules:
+                self.geometry_encoding.set_temp_param_grad(True)
+            else:
+                self.geometry_encoding.set_temp_param_grad(False)
         out = self(batch)
         if not self.static:
             if static:

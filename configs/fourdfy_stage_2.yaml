@@ -102,7 +102,7 @@ system:
     pretrained_model_name_or_path_lora: "stabilityai/stable-diffusion-2-1"
     guidance_scale: 7.5
     min_step_percent: 0.02
-    max_step_percent: 0.5
+    max_step_percent: 0.98
     max_step_percent_annealed: 0.5
     anneal_start_step: 5000
   
@@ -156,7 +156,7 @@ system:
         lr: 0.001
       background:
         lr: 0.001
-      guidance:
+      guidance_single_view:
         lr: 0.0001
 
 trainer:

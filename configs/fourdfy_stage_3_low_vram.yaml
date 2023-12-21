@@ -1,4 +1,4 @@
-name: "fourdfy_stage_3"
+name: "fourdfy_stage_3_low_vram"
 tag: "${rmspace:${system.prompt_processor.prompt},_}"
 exp_root_dir: "outputs"
 seed: 0
@@ -24,7 +24,7 @@ data:
     static: false
     num_frames: 16
     simultan: true
-    prob_single_view_video: 0.5
+    prob_single_view_video: 1.0
     width_vid: 288
     height_vid: 160
     sample_rand_frames: t0
@@ -56,6 +56,7 @@ data:
 
 system_type: "fourdfy-system"
 system:
+  freeze_static_modules: true
   prob_multi_view: ${data.prob_multi_view}
   prob_single_view_video: ${data.single_view.prob_single_view_video}
   stage: coarse
@@ -83,7 +84,7 @@ system:
       min_anneal_step: 0
       max_anneal_step: 50000
       start_val: ${system.geometry.density_blob_std}
-      end_val: 5.0
+      end_val: 0.5
 
   material_type: "no-material"
   material:
@@ -93,12 +94,15 @@ system:
   background_type: "neural-environment-map-background"
   background:
     color_activation: sigmoid
-    random_aug: true
+    random_aug: false
 
-  renderer_type: "nerf-volume-renderer"
+  renderer_type: "stable-nerf-volume-renderer"
   renderer:
-    radius: ${system.geometry.radius}
-    num_samples_per_ray: 512
+    base_renderer_type: "mask-nerf-volume-renderer"
+    base_renderer:
+      radius: ${system.geometry.radius}
+      num_samples_per_ray: 512
+      train_max_nums: 100000
 
   simultan: ${data.single_view.simultan}
   prompt_processor_type: "stable-diffusion-prompt-processor"
@@ -146,6 +150,7 @@ system:
     pretrained_model_name_or_path: "cerspense/zeroscope_v2_576w"
     guidance_scale: 100.
     weighting_strategy: sds
+    low_ram_vae: 4
 
   loggers:
     wandb:
@@ -162,6 +167,7 @@ system:
     lambda_opaque: [10000, 0.0, 1000.0, 10001]
     lambda_z_variance: 0.
     lambda_tv: 0.
+    lambda_deformation: 0.
   optimizer:
     name: AdamW
     args:
@@ -178,11 +184,11 @@ system:
         lr: 0.001
       background:
         lr: 0.001
-      guidance_single_view:
+      guidance:
         lr: 0.0001
 
 trainer:
-  max_steps: 100000
+  max_steps: 300000
   log_every_n_steps: 1
   num_sanity_val_steps: 0
   val_check_interval: 1000

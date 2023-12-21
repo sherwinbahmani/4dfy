@@ -46,6 +46,7 @@ class ZeroscopeGuidance(BaseObject):
         token_merging_params: Optional[dict] = field(default_factory=dict)
 
         view_dependent_prompting: bool = True
+        low_ram_vae: int = -1
 
     cfg: Config
 
@@ -182,8 +183,40 @@ class ZeroscopeGuidance(BaseObject):
         if normalize:
             imgs = imgs * 2.0 - 1.0
         # breakpoint()
-        posterior = self.vae.encode(imgs.to(self.weights_dtype)).latent_dist
-        latents = posterior.sample() * self.vae.config.scaling_factor
+        if self.cfg.low_ram_vae > 0:
+            vnum = self.cfg.low_ram_vae
+            mask_vae = torch.randperm(imgs.shape[0]) < vnum
+            with torch.no_grad():
+                posterior_mask = torch.cat(
+                    [
+                        self.vae.encode(
+                            imgs[~mask_vae][i : i + 1].to(self.weights_dtype)
+                        ).latent_dist.sample()
+                        for i in range(imgs.shape[0] - vnum)
+                    ],
+                    dim=0,
+                )
+            posterior = torch.cat(
+                [
+                    self.vae.encode(
+                        imgs[mask_vae][i : i + 1].to(self.weights_dtype)
+                    ).latent_dist.sample()
+                    for i in range(vnum)
+                ],
+                dim=0,
+            )
+            posterior_full = torch.zeros(
+                imgs.shape[0],
+                *posterior.shape[1:],
+                device=posterior.device,
+                dtype=posterior.dtype,
+            )
+            posterior_full[~mask_vae] = posterior_mask
+            posterior_full[mask_vae] = posterior
+            latents = posterior_full * self.vae.config.scaling_factor
+        else:
+            posterior = self.vae.encode(imgs.to(self.weights_dtype)).latent_dist
+            latents = posterior.sample() * self.vae.config.scaling_factor
 
         latents = (
             latents[None, :]
