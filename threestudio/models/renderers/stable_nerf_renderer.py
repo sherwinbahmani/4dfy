@@ -8,7 +8,7 @@ from threestudio.models.geometry.base import BaseImplicitGeometry
 from threestudio.models.materials.base import BaseMaterial
 from threestudio.models.renderers.base import VolumeRenderer
 from threestudio.utils.typing import *
-
+from copy import copy
 
 @threestudio.register("stable-nerf-volume-renderer")
 class PatchRenderer(VolumeRenderer):
@@ -59,7 +59,12 @@ class PatchRenderer(VolumeRenderer):
                 YI = self.cfg.block_nums[0]
                 XI = self.cfg.block_nums[1]
 
-                MAX_N = self.base_renderer.cfg.train_max_nums
+                MAX_N_STATIC = copy(self.base_renderer.cfg.train_max_nums_static)
+                MAX_N_DYNAMIC = copy(self.base_renderer.cfg.train_max_nums)
+                if kwargs['is_video']:
+                    MAX_N = copy(MAX_N_DYNAMIC)
+                else:
+                    MAX_N = copy(MAX_N_STATIC)
                 for i in range(YI):
                     for j in range(XI):
                         int_rays_o = rays_o[:, i::YI, j::XI]
@@ -105,7 +110,8 @@ class PatchRenderer(VolumeRenderer):
                 for key in valid_patch_key:
                     if not torch.is_tensor(out_global[key]):
                         out_global[key] = torch.cat(out_global[key], dim=0)
-                self.base_renderer.cfg.train_max_nums = MAX_N
+                self.base_renderer.cfg.train_max_nums_static = MAX_N_STATIC
+                self.base_renderer.cfg.train_max_nums = MAX_N_DYNAMIC
                 out = out_global
         else:
             out = self.base_renderer(

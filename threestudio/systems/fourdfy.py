@@ -6,7 +6,7 @@ import numpy as np
 
 import threestudio
 from threestudio.systems.base import BaseLift3DSystem
-from threestudio.utils.ops import binary_cross_entropy, dot
+from threestudio.utils.ops import binary_cross_entropy, dot, TVLoss
 from threestudio.utils.typing import *
 
 
@@ -34,6 +34,7 @@ class Fourdfy(BaseLift3DSystem):
         self.prompt_processor = None
         self.prompt_utils = None
         self.geometry_encoding = self.geometry.encoding.encoding
+        self.tv_loss = TVLoss() if self.C(self.cfg.loss.lambda_deformation) > 0 else None
         if self.prob_multi_view not in [0.0, None]:
             self.cfg.prompt_processor_multi_view["prompt"] = self.cfg.prompt_processor["prompt"]
             self.guidance_multi_view = threestudio.find(self.cfg.guidance_type_multi_view)(self.cfg.guidance_multi_view)
@@ -93,8 +94,11 @@ class Fourdfy(BaseLift3DSystem):
                         render_out = self.renderer(**batch)
                     render_outs.append(render_out)
                 out = {}
-                for k in render_out:
-                    out[k] = torch.cat([render_out_i[k] for render_out_i in render_outs])
+                for k, v in render_out.items():
+                    if v is not None:
+                        out[k] = torch.cat([render_out_i[k] for render_out_i in render_outs])
+                    else:
+                        out[k] = v
             else:
                 out = self.renderer(**batch)
         return out
@@ -194,6 +198,10 @@ class Fourdfy(BaseLift3DSystem):
                 loss_z_variance = out["z_variance"][out["opacity"] > 0.5].mean()
                 self.log("train/loss_z_variance", loss_z_variance)
                 loss += loss_z_variance * self.C(self.cfg.loss.lambda_z_variance)
+            if self.C(self.cfg.loss.lambda_deformation) > 0 and "deformation" in out and out["deformation"] is not None:
+                loss_deformation = self.tv_loss(out["deformation"].permute(3, 0, 1, 2))
+                self.log("train/loss_deformation", loss_deformation)
+                loss += loss_deformation * self.C(self.cfg.loss.lambda_deformation)
 
         elif self.cfg.stage == "geometry":
             loss_normal_consistency = out["mesh"].normal_consistency()

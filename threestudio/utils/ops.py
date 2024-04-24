@@ -148,7 +148,7 @@ def chunk_batch(func: Callable, chunk_size: int, *args, **kwargs) -> Any:
             )
             exit(1)
         for k, v in out_chunk.items():
-            v = v if torch.is_grad_enabled() else v.detach()
+            v = v if torch.is_grad_enabled() or v is None else v.detach()
             out[k].append(v)
 
     if out_type is None:
@@ -424,3 +424,17 @@ def validate_empty_rays(ray_indices, t_start, t_end):
         t_start = torch.Tensor([0]).to(ray_indices)
         t_end = torch.Tensor([0]).to(ray_indices)
     return ray_indices, t_start, t_end
+
+class TVLoss(nn.Module):
+    def __init__(self, tv_loss_weight=[1.0, 1.0, 1.0]):
+        super(TVLoss, self).__init__()
+        self.tv_loss_weight = tv_loss_weight
+
+    def forward(self, x):
+        t_tv = (x[:, 1:] - x[:, :-1]).square().mean(0).sum()
+        h_tv = (x[:, :, 1:] - x[:, :, :-1]).square().mean(0).sum()
+        w_tv = (x[:, :, :, 1:] - x[:, :, :, :-1]).square().mean(0).sum()
+        return 3 * (t_tv + h_tv + w_tv)
+
+    def _tensor_size(self, t):
+        return t.shape[1] * t.shape[2] * t.shape[3] * t.shape[4]

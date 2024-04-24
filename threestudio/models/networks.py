@@ -94,7 +94,7 @@ class TCNNEncodingSpatialTime(nn.Module):
             for param in param_list.parameters():
                 param.requires_grad = requires_grad
 
-    def forward(self, x):
+    def forward(self, x, out_all=False):
         if self.update_occ_grid and not isinstance(self.frame_time, float):
             frame_time = self.frame_time
         else:
@@ -112,6 +112,77 @@ class TCNNEncodingSpatialTime(nn.Module):
         enc_space_time = self.encoding_time(x_frame_time)
         enc = enc_space + enc_space_time
         return enc
+
+class TCNNEncodingSpatialTimeDeform(nn.Module):
+    def __init__(self, in_channels, config, dtype=torch.float32) -> None:
+        super().__init__()
+        self.n_input_dims = in_channels
+        config["otype"] = "HashGrid"
+        self.num_frames = 1 #config["num_frames"]
+        self.static = config["static"]
+        self.cfg = config_to_primitive(config)
+        with torch.cuda.device(get_rank()):
+            self.encoding = tcnn.Encoding(self.n_input_dims, self.cfg, dtype=dtype)
+            self.encoding_time = get_encoding(self.n_input_dims + 1, config["time_encoding_config"])
+        self.time_network = get_mlp(
+            self.encoding_time.n_output_dims, self.n_input_dims, config["time_network_config"]
+            )
+        self.n_output_dims = self.encoding.n_output_dims
+        self.frame_time = None
+        if self.static:
+            self.set_temp_param_grad(requires_grad=False)
+        self.is_video = True
+        self.update_occ_grid = False
+    
+    def init_params_zero(self, param_list):
+        if isinstance(param_list, nn.Parameter):
+            nn.init.zeros_(param_list.data)
+        else:
+            for param in param_list.parameters():
+                nn.init.zeros_(param.data)
+    
+    def set_temp_param_grad(self, requires_grad=False):
+        self.set_param_grad(self.encoding_time, requires_grad=requires_grad)
+        self.set_param_grad(self.time_network, requires_grad=requires_grad)
+        self.set_param_grad(self.encoding, requires_grad=self.static)
+
+    def set_param_grad(self, param_list, requires_grad=False):
+        if isinstance(param_list, nn.Parameter):
+            param_list.requires_grad = requires_grad
+        else:
+            for param in param_list.parameters():
+                param.requires_grad = requires_grad
+    
+    def warp(self, x):
+        return self.time_network(self.encoding_time(x))
+
+    def forward(self, x, out_all=False):
+        if self.update_occ_grid and not isinstance(self.frame_time, float):
+            frame_time = self.frame_time
+        else:
+            if (self.static or not self.training) and self.frame_time is None:
+                frame_time = torch.zeros((self.num_frames, 1), device=x.device, dtype=x.dtype).expand(x.shape[0], 1)
+            else:
+                if self.frame_time is None:
+                    frame_time = 0.0
+                else:
+                    frame_time = self.frame_time
+                frame_time = (torch.ones((self.num_frames, 1), device=x.device, dtype=x.dtype)*frame_time).expand(x.shape[0], 1)
+            frame_time = frame_time.view(-1, 1)
+        if not self.static:
+            x_frame_time = torch.cat((x, frame_time), 1)
+            dx = self.warp(x_frame_time)
+            x = x + dx
+        else:
+            dx = None
+        enc = self.encoding(x)
+        if out_all:
+            if not self.static:
+                return enc, dx
+            else:
+                return enc, None
+        else:
+            return enc
 
 class ProgressiveBandHashGrid(nn.Module, Updateable):
     def __init__(self, in_channels, config, dtype=torch.float32):
@@ -168,12 +239,12 @@ class CompositeEncoding(nn.Module, Updateable):
             + self.encoding.n_output_dims
         )
 
-    def forward(self, x, *args):
+    def forward(self, x, *args, **kwargs):
         return (
-            self.encoding(x, *args)
+            self.encoding(x, *args, **kwargs)
             if not self.include_xyz
             else torch.cat(
-                [x * self.xyz_scale + self.xyz_offset, self.encoding(x, *args)], dim=-1
+                [x * self.xyz_scale + self.xyz_offset, self.encoding(x, *args, **kwargs)], dim=-1
             )
         )
 
@@ -187,6 +258,8 @@ def get_encoding(n_input_dims: int, config) -> nn.Module:
         encoding = ProgressiveBandHashGrid(n_input_dims, config_to_primitive(config))
     elif config.otype == "HashGridSpatialTime":
         encoding = TCNNEncodingSpatialTime(n_input_dims, config)
+    elif config.otype == "HashGridSpatialTimeDeform":
+        encoding = TCNNEncodingSpatialTimeDeform(n_input_dims, config)
     else:
         encoding = TCNNEncoding(n_input_dims, config_to_primitive(config))
     encoding = CompositeEncoding(

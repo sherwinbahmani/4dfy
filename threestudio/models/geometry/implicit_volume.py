@@ -117,12 +117,17 @@ class ImplicitVolume(BaseImplicitGeometry):
         points = contract_to_unisphere(
             points, self.bbox, self.unbounded
         )  # points normalized to (0, 1)
-        enc = self.encoding(points.view(-1, self.cfg.n_input_dims))
+        enc = self.encoding(points.view(-1, self.cfg.n_input_dims), out_all=True)
+        if isinstance(enc, Tuple):
+            enc, dx = enc
+        else:
+            dx = None
         density = self.density_network(enc).view(*points.shape[:-1], 1)
         raw_density, density = self.get_activated_density(points_unscaled, density)
 
         output = {
             "density": density,
+            "dx": dx,
         }
 
         if self.cfg.n_feature_dims > 0:

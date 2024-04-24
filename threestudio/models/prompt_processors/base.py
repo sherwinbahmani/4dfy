@@ -9,7 +9,7 @@ from pytorch_lightning.utilities.rank_zero import rank_zero_only
 
 import threestudio
 from threestudio.utils.base import BaseObject
-from threestudio.utils.misc import barrier, cleanup
+from threestudio.utils.misc import barrier, cleanup, get_rank
 from threestudio.utils.typing import *
 
 
@@ -87,6 +87,7 @@ class PromptProcessor(BaseObject):
         view_dependent_prompt_front: bool = False
         use_cache: bool = True
         spawn: bool = True
+        config: str = ""
 
     cfg: Config
 
@@ -190,7 +191,7 @@ class PromptProcessor(BaseObject):
         self.load_text_embeddings()
 
     @staticmethod
-    def spawn_func(pretrained_model_name_or_path, prompts, cache_dir):
+    def spawn_func(pretrained_model_name_or_path, prompts, cache_dir, cfg=None):
         raise NotImplementedError
 
     @rank_zero_only
@@ -228,6 +229,7 @@ class PromptProcessor(BaseObject):
                         self.cfg.pretrained_model_name_or_path,
                         prompts_to_process,
                         self._cache_dir,
+                        self.cfg,
                     ),
                 )
                 subprocess.start()
@@ -237,6 +239,7 @@ class PromptProcessor(BaseObject):
                     self.cfg.pretrained_model_name_or_path,
                     prompts_to_process,
                     self._cache_dir,
+                    self.cfg,
                 )
             cleanup()
 

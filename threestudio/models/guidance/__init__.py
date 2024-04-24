@@ -5,4 +5,5 @@ from . import (
     zero123_guidance,
     zeroscope_guidance,
     multiview_diffusion_guidance,
+    videocrafter_guidance,
 )

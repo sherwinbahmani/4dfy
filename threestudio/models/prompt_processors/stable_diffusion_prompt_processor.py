@@ -70,7 +70,7 @@ class StableDiffusionPromptProcessor(PromptProcessor):
     ###
 
     @staticmethod
-    def spawn_func(pretrained_model_name_or_path, prompts, cache_dir):
+    def spawn_func(pretrained_model_name_or_path, prompts, cache_dir, **kwargs):
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         tokenizer = AutoTokenizer.from_pretrained(
             pretrained_model_name_or_path, subfolder="tokenizer"

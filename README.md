@@ -1,5 +1,7 @@
 # 4D-fy - threestudio
 
+![Random Sample](./assets/4dfy.png)
+
 | [Project Page](https://sherwinbahmani.github.io/4dfy/) | [Paper](https://arxiv.org/abs/2311.17984) | [User Study Template](https://github.com/victor-rong/video-generation-study) | [threestudio extension](https://github.com/DSaurus/threestudio-4dfy) |
 
 - **This code is forked from [threestudio](https://github.com/threestudio-project/threestudio).**
@@ -64,28 +66,55 @@ exp_root_dir=/path/to
 # Original configs used in paper with 80 GB GPU memory
 
 # Stage 1
-# python launch.py --config configs/fourdfy_stage_1.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard"
+# python launch.py --config configs/fourdfy_stage_1.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing"
 
 # Stage 2
-# ckpt=/path/to/fourdfy_stage_1/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
-# python launch.py --config configs/fourdfy_stage_2.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
+# ckpt=/path/to/fourdfy_stage_1/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_2.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
 
 # Stage 3
-# ckpt=/path/to/fourdfy_stage_2/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
-# python launch.py --config configs/fourdfy_stage_3.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
+# ckpt=/path/to/fourdfy_stage_2/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
 
 # Low memory configs for 24-48 GB GPU memory
 
 # Stage 1
-# python launch.py --config configs/fourdfy_stage_1_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard"
+# python launch.py --config configs/fourdfy_stage_1_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing"
 
 # Stage 2
-# ckpt=/path/to/fourdfy_stage_1_low_vram/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
-# python launch.py --config configs/fourdfy_stage_2_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
+# ckpt=/path/to/fourdfy_stage_1_low_vram/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_2_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
 
 # Stage 3
-# ckpt=/path/to/fourdfy_stage_2_low_vram/a_dog_riding_a_skateboard@timestamp/ckpts/last.ckpt
-# python launch.py --config configs/fourdfy_stage_3_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a dog riding a skateboard" system.weights=$ckpt
+# ckpt=/path/to/fourdfy_stage_2_low_vram/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3_low_vram.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
+
+
+### Alternatives
+# Use VideoCrafter2 in stage 3
+
+# ckpt=/path/to/fourdfy_stage_2/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3_vc.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
+
+# ckpt=/path/to/fourdfy_stage_2_low_vram/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3_low_vram_vc.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
+
+# Use deformation based approach to preserve quality in dynamic stage
+
+# Stage 1
+# python launch.py --config configs/fourdfy_stage_1_low_vram_deformation.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing"
+
+# Stage 2
+# ckpt=/path/to/fourdfy_stage_1_low_vram_deformation/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_2_low_vram_deformation.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
+
+# Stage 3: Low memory configs for 24-48 GB GPU memory
+# ckpt=/path/to/fourdfy_stage_2_low_vram_deformation/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3_low_vram_vc_deformation.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
+
+# Stage 3
+# ckpt=/path/to/fourdfy_stage_2_low_vram_deformation/a_panda_dancing@timestamp/ckpts/last.ckpt
+# python launch.py --config configs/fourdfy_stage_3_vc_deformation.yaml --train --gpu $gpu exp_root_dir=$exp_root_dir seed=$seed system.prompt_processor.prompt="a panda dancing" system.weights=$ckpt
 ```
 
 ## Memory Usage
@@ -101,10 +130,12 @@ There are ways to reduce memory usage to fit on smaller GPUs:
 
 ## More tips
 - **More motion**. To increase the motion, the learning rate for the video model can be increased to system.loss.lambda_sds_video=0.3 or system.loss.lambda_sds_video=0.5.
+- **Use VideoCrafter2 video guidance**. In the paper we used ZeroScope, but there is an option in the train.sh to use VideoCrafter2 instead for more motion and higher quality.
+- **Use deformation based approach**. Instead of adding features from a static and dynamic hash grid, we also provide a deformation based approach in the train.sh to keep the static quality and only learn a deformation based motion.
 
 ## Credits
 
-This code is built on the [threestudio-project](https://github.com/threestudio-project/threestudio) and [MVDream-threestudio](https://github.com/bytedance/MVDream-threestudio). Thanks to the maintainers for their contribution to the community!
+This code is built on the [threestudio-project](https://github.com/threestudio-project/threestudio), [MVDream-threestudio](https://github.com/bytedance/MVDream-threestudio), and [VideoCrafter](https://github.com/AILab-CVC/VideoCrafter). Thanks to the maintainers for their contribution to the community!
 
 ## Citing
 

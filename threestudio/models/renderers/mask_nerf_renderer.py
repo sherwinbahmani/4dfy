@@ -48,6 +48,7 @@ class StableNeRFVolumeRenderer(VolumeRenderer):
 
         # for memory
         train_max_nums: int = 6000000
+        train_max_nums_static: int = 2000000
 
     cfg: Config
 
@@ -383,6 +384,13 @@ class StableNeRFVolumeRenderer(VolumeRenderer):
         comp_rgb_fg: Float[Tensor, "Nr Nc"] = nerfacc.accumulate_along_rays(
             weights[..., 0], values=rgb_fg_all, ray_indices=ray_indices, n_rays=n_rays
         )
+        if geo_out["dx"] is not None:
+            deformation: Float[Tensor, "Nr Nc"] = nerfacc.accumulate_along_rays(
+                weights[..., 0], values=geo_out["dx"], ray_indices=ray_indices, n_rays=n_rays
+            )
+            deformation = deformation.view(batch_size, height, width, -1)
+        else:
+            deformation = None
 
         # populate depth and opacity to each point
         t_depth = depth[ray_indices]
@@ -415,6 +423,7 @@ class StableNeRFVolumeRenderer(VolumeRenderer):
             "opacity": opacity.view(batch_size, height, width, 1),
             "depth": depth.view(batch_size, height, width, 1),
             "z_variance": z_variance.view(batch_size, height, width, 1),
+            "deformation": deformation,
         }
 
         if self.training:

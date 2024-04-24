@@ -82,7 +82,7 @@ system:
     base_renderer:
       radius: ${system.geometry.radius}
       num_samples_per_ray: 512
-      train_max_nums: 100000
+      train_max_nums: 2000000
 
   prompt_processor_type: "stable-diffusion-prompt-processor"
   prompt_processor:
@@ -141,10 +141,11 @@ system:
     lambda_vsd: 1.
     lambda_lora: 1.
     lambda_orient: 0.
-    lambda_sparsity: 10.
-    lambda_opaque: [10000, 0.0, 1000.0, 10001]
+    lambda_sparsity: 0.
+    lambda_opaque: 0.
     lambda_z_variance: 0.
     lambda_tv: 0.
+    lambda_deformation: 0.
   optimizer:
     name: AdamW
     args:

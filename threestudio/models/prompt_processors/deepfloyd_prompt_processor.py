@@ -53,7 +53,7 @@ class DeepFloydPromptProcessor(PromptProcessor):
     ###
 
     @staticmethod
-    def spawn_func(pretrained_model_name_or_path, prompts, cache_dir):
+    def spawn_func(pretrained_model_name_or_path, prompts, cache_dir, **kwargs):
         max_length = 77
         tokenizer = T5Tokenizer.from_pretrained(
             pretrained_model_name_or_path, subfolder="tokenizer"
