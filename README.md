@@ -142,10 +142,10 @@ This code is built on the [threestudio-project](https://github.com/threestudio-p
 If you find 4D-fy helpful, please consider citing:
 
 ```
-@article{bahmani20234d,
+@article{bahmani20244dfy,
   title={4D-fy: Text-to-4D Generation Using Hybrid Score Distillation Sampling},
   author={Bahmani, Sherwin and Skorokhodov, Ivan and Rong, Victor and Wetzstein, Gordon and Guibas, Leonidas and Wonka, Peter and Tulyakov, Sergey and Park, Jeong Joon and Tagliasacchi, Andrea and Lindell, David B.},
-  journal={arXiv preprint arXiv:2311.17984},
-  year={2023}
+  journal={IEEE Conference on Computer Vision and Pattern Recognition ({CVPR})},
+  year={2024}
 }
 ```
